@@ -1,0 +1,1258 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>fandispotter — Авиация Ташкента</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet"/>
+  <style> #preloader {
+  position: fixed;
+  inset: 0;
+  background: #050d1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 9999;
+  animation: fadeOut 2.5s ease 2.5s forwards;
+
+  .flying-plane {
+  position: fixed;
+  font-size: 28px;
+  top: 20%;
+  left: -50px;
+  opacity: 0.6;
+  pointer-events: none;
+  z-index: 9999;
+  animation: fly 12s linear infinite;
+}
+
+@keyframes fly {
+  0% {
+    left: -50px;
+    top: 20%;
+    transform: rotate(10deg);
+  }
+  50% {
+    top: 60%;
+  }
+  100% {
+    left: 110%;
+    top: 30%;
+    transform: rotate(-10deg);
+  }
+}
+}
+
+.plane {
+  font-size: 3rem;
+  z-index: 2;
+  animation: takeoff 2.5s ease forwards;
+  filter: drop-shadow(0 0 12px #00d4ff);
+}
+
+.smoke {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(0,212,255,0.25), transparent 70%);
+  filter: blur(30px);
+  animation: smokeMove 2.5s ease forwards;
+  z-index: 1;
+}
+
+.runway-lines {
+  position: absolute;
+  bottom: 20%;
+  width: 120%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00d4ff, transparent);
+  opacity: 0.3;
+  animation: runwayFlash 2.5s ease forwards;
+}
+
+@keyframes takeoff {
+  0%   { transform: translateY(60px) scale(1); }
+  50%  { transform: translateY(-20px) scale(1.2); }
+  100% { transform: translateY(-220px) scale(0.8); opacity: 0; }
+}
+
+@keyframes smokeMove {
+  0%   { transform: scale(0.5); opacity: 0.6; }
+  60%  { transform: scale(1.4); opacity: 0.4; }
+  100% { transform: scale(2); opacity: 0; }
+}
+
+@keyframes runwayFlash {
+  0% { opacity: 0.1; transform: scaleX(0.5); }
+  50% { opacity: 0.6; }
+  100% { opacity: 0; transform: scaleX(1.5); }
+}
+
+@keyframes fadeOut {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+    :root {
+      --sky: #ffffff;
+      --deep: #050d1a;
+      --blue: #1a6bff;
+      --cyan: #00d4ff;
+      --gold: #08f800;
+      --white: #e8f4ff;
+      --muted: #7a9cc0;
+      --card: rgba(10, 30, 60, 0.85);
+      --border: rgba(0, 212, 255, 0.2);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Rajdhani', sans-serif;
+      background: var(--deep);
+      color: var(--white);
+      overflow-x: hidden;
+    }
+
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0; opacity: .5;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 48px;
+      background: rgba(5, 13, 26, 0.9);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.4rem; font-weight: 900;
+      letter-spacing: 2px;
+      color: var(--cyan);
+      text-shadow: 0 0 20px rgba(0,212,255,.5);
+    }
+    .logo span { color: var(--gold); }
+
+    nav ul {
+      list-style: none;
+      display: flex; gap: 36px;
+    }
+    nav ul a {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 600; font-size: .95rem;
+      color: var(--muted);
+      text-decoration: none; letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: color .25s;
+    }
+    nav ul a:hover { color: var(--cyan); }
+
+    .nav-badge {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .75rem; color: var(--gold);
+      border: 1px solid var(--gold);
+      padding: 4px 10px; letter-spacing: 1px;
+    }
+
+    /* ── HERO ── */
+    #hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      text-align: center; padding: 120px 24px 60px;
+    }
+
+    /* Animated sky gradient */
+    #hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 50% at 50% 0%, rgba(26,107,255,.35) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 30% at 20% 60%, rgba(0,212,255,.15) 0%, transparent 60%),
+        linear-gradient(180deg, #0a1628 0%, #050d1a 100%);
+      animation: skyPulse 8s ease-in-out infinite alternate;
+    }
+    @keyframes skyPulse {
+      from { opacity: .8; }
+      to { opacity: 1; }
+    }
+
+    /* Stars */
+    .stars {
+      position: absolute; inset: 0; pointer-events: none;
+    }
+    .star {
+      position: absolute;
+      background: white; border-radius: 50%;
+      animation: twinkle var(--d, 3s) ease-in-out infinite alternate;
+    }
+    @keyframes twinkle {
+      from { opacity: .2; transform: scale(1); }
+      to   { opacity: 1;  transform: scale(1.4); }
+    }
+
+    /* Animated plane */
+    .hero-plane {
+      position: absolute;
+      font-size: 3rem;
+      animation: flyAcross 18s linear infinite;
+      opacity: .35;
+      top: 30%;
+    }
+    @keyframes flyAcross {
+      from { left: -8%; }
+      to   { left: 108%; }
+    }
+
+    /* Runway lines */
+    .runway {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      animation: runwayGlow 3s ease-in-out infinite alternate;
+    }
+    @keyframes runwayGlow {
+      from { opacity: .3; }
+      to   { opacity: 1; box-shadow: 0 0 20px var(--cyan); }
+    }
+
+    .hero-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .8rem; letter-spacing: 4px;
+      color: var(--cyan); text-transform: uppercase;
+      margin-bottom: 20px;
+      position: relative; z-index: 1;
+    }
+
+    h1 {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(2.8rem, 7vw, 6rem);
+      font-weight: 900; line-height: 1;
+      letter-spacing: -1px;
+      position: relative; z-index: 1;
+      animation: fadeUp .9s ease both;
+    }
+    h1 .accent { color: var(--cyan); }
+    h1 .gold { color: var(--gold); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    .hero-sub {
+      font-size: 1.25rem; font-weight: 600;
+      color: var(--muted); margin-top: 16px;
+      letter-spacing: 2px; text-transform: uppercase;
+      position: relative; z-index: 1;
+      animation: fadeUp .9s .15s ease both;
+    }
+
+    .hero-desc {
+      max-width: 540px; margin: 20px auto 0;
+      font-size: 1.05rem; line-height: 1.7;
+      color: rgba(232,244,255,.65);
+      position: relative; z-index: 1;
+      animation: fadeUp .9s .3s ease both;
+    }
+
+    .hero-btns {
+      display: flex; gap: 16px; margin-top: 40px;
+      justify-content: center;
+      position: relative; z-index: 1;
+      animation: fadeUp .9s .45s ease both;
+    }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 32px;
+      font-family: 'Orbitron', monospace;
+      font-size: .8rem; font-weight: 700;
+      letter-spacing: 2px; text-decoration: none;
+      text-transform: uppercase; cursor: pointer;
+      transition: all .25s;
+    }
+    .btn-primary {
+      background: var(--cyan); color: var(--deep);
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    }
+    .btn-primary:hover {
+      background: white; transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(0,212,255,.4);
+    }
+    .btn-outline {
+      border: 1px solid var(--border); color: var(--cyan);
+      background: transparent;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    }
+    .btn-outline:hover {
+      border-color: var(--cyan); background: rgba(0,212,255,.08);
+      transform: translateY(-2px);
+    }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 0; position: relative; z-index: 1;
+      margin-top: 60px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      backdrop-filter: blur(8px);
+      max-width: 720px; margin-left: auto; margin-right: auto;
+    }
+    .stat-item {
+      flex: 1; min-width: 140px;
+      padding: 20px 24px;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.8rem; font-weight: 900;
+      color: var(--cyan);
+    }
+    .stat-lbl {
+      font-size: .8rem; color: var(--muted);
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-top: 4px;
+    }
+
+    /* ── SECTION COMMON ── */
+    section { position: relative; z-index: 1; }
+
+    .section-header {
+      text-align: center; padding: 80px 24px 48px;
+    }
+    .section-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .75rem; letter-spacing: 4px;
+      color: var(--cyan); text-transform: uppercase;
+      display: block; margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.6rem, 4vw, 2.8rem);
+      font-weight: 900; letter-spacing: -1px;
+    }
+    .section-title .accent { color: var(--cyan); }
+    .divider {
+      width: 80px; height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      margin: 16px auto 0;
+    }
+
+    /* ── PHOTO GALLERY ── */
+    #gallery { padding: 0 48px 80px; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto;
+      gap: 12px;
+    }
+
+    .gallery-item {
+      position: relative; overflow: hidden;
+      cursor: pointer;
+      border: 1px solid var(--border);
+    }
+    .gallery-item:first-child {
+      grid-column: span 2; grid-row: span 2;
+    }
+
+    .gallery-item img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .5s ease;
+      min-height: 180px;
+    }
+    .gallery-item:first-child img { min-height: 380px; }
+
+    .gallery-item:hover img { transform: scale(1.06); }
+
+    .gallery-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(5,13,26,.85) 0%, transparent 50%);
+      opacity: 0; transition: opacity .3s;
+      display: flex; align-items: flex-end; padding: 20px;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+    .gallery-caption {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .8rem; color: var(--cyan);
+      letter-spacing: 1px;
+    }
+
+    /* placeholder image with plane icon */
+    .photo-placeholder {
+      width: 100%; background: var(--card);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px; color: var(--muted);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .75rem; letter-spacing: 1px;
+      border: 1px dashed var(--border);
+      min-height: 180px;
+      transition: background .3s;
+    }
+    .gallery-item:first-child .photo-placeholder { min-height: 380px; }
+    .photo-placeholder:hover { background: rgba(0,212,255,.05); }
+    .photo-placeholder .icon { font-size: 2.5rem; opacity: .4; }
+
+    /* ── VIDEO SECTION ── */
+    #videos { padding: 0 48px 80px; }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .video-card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      overflow: hidden;
+      transition: transform .3s, box-shadow .3s;
+    }
+    .video-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 40px rgba(0,212,255,.15);
+    }
+
+    .video-thumb {
+      width: 100%; aspect-ratio: 16/9;
+      background: linear-gradient(135deg, #0a1e40, #051020);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; overflow: hidden;
+      font-size: 3.5rem;
+      cursor: pointer;
+    }
+    .video-thumb::after {
+      content: '▶';
+      position: absolute;
+      font-size: 2rem; color: white;
+      background: rgba(0,212,255,.85);
+      width: 56px; height: 56px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      transition: transform .3s;
+    }
+    .video-card:hover .video-thumb::after { transform: scale(1.1); }
+
+    .video-info { padding: 16px 20px; }
+    .video-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700; font-size: 1.05rem;
+      color: var(--white); margin-bottom: 6px;
+    }
+    .video-meta {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .72rem; color: var(--muted);
+      display: flex; gap: 16px;
+    }
+    .video-meta span { display: flex; align-items: center; gap: 4px; }
+
+    /* ── FACTS ── */
+    #facts {
+      padding: 0 48px 80px;
+      background: linear-gradient(180deg, transparent, rgba(26,107,255,.05), transparent);
+    }
+
+    .facts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .fact-card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 28px 24px;
+      position: relative; overflow: hidden;
+      transition: transform .3s, border-color .3s;
+    }
+    .fact-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 3px; height: 100%;
+      background: var(--cyan);
+    }
+    .fact-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(0,212,255,.4);
+    }
+    .fact-card:nth-child(even)::before { background: var(--gold); }
+
+    .fact-icon { font-size: 2rem; margin-bottom: 12px; }
+    .fact-title {
+      font-family: 'Orbitron', monospace;
+      font-size: .9rem; font-weight: 700;
+      color: var(--cyan); margin-bottom: 10px;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .fact-card:nth-child(even) .fact-title { color: var(--gold); }
+    .fact-text {
+      font-size: 1rem; line-height: 1.65;
+      color: rgba(232,244,255,.75);
+    }
+    .fact-num {
+      position: absolute; bottom: 16px; right: 20px;
+      font-family: 'Orbitron', monospace;
+      font-size: 3rem; font-weight: 900;
+      color: rgba(255,255,255,.04);
+      line-height: 1;
+    }
+
+    /* ── AIRLINES / AIRPORT ── */
+    #airlines { padding: 0 48px 80px; }
+
+    .airlines-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .airline-card {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 32px 28px;
+      text-align: center;
+      transition: transform .3s, box-shadow .3s;
+      position: relative; overflow: hidden;
+    }
+    .airline-card::after {
+      content: '';
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      transform: scaleX(0); transition: transform .4s;
+    }
+    .airline-card:hover { transform: translateY(-6px); box-shadow: 0 20px 50px rgba(0,212,255,.12); }
+    .airline-card:hover::after { transform: scaleX(1); }
+
+    .airline-logo { font-size: 4rem; margin-bottom: 16px; }
+    .airline-name {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.1rem; font-weight: 900;
+      letter-spacing: 1px; margin-bottom: 8px;
+    }
+    .airline-code {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .8rem; color: var(--cyan);
+      letter-spacing: 3px; margin-bottom: 16px;
+    }
+    .airline-text {
+      font-size: .95rem; line-height: 1.65;
+      color: rgba(232,244,255,.7);
+    }
+    .airline-route {
+      margin-top: 16px; display: flex; flex-wrap: wrap;
+      gap: 6px; justify-content: center;
+    }
+    .route-tag {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .7rem; padding: 3px 10px;
+      border: 1px solid var(--border);
+      color: var(--muted); letter-spacing: 1px;
+    }
+
+    /* ── SPOTTER TIPS ── */
+    #spotter { padding: 0 48px 80px; }
+
+    .tips-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .tip-item {
+      display: flex; gap: 16px; align-items: flex-start;
+      padding: 20px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      transition: border-color .3s;
+    }
+    .tip-item:hover { border-color: rgba(0,212,255,.4); }
+    .tip-num {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.4rem; font-weight: 900;
+      color: rgba(0,212,255,.3); line-height: 1; flex-shrink: 0;
+    }
+    .tip-content {}
+    .tip-title {
+      font-weight: 700; font-size: 1rem;
+      color: var(--white); margin-bottom: 6px;
+    }
+    .tip-text { font-size: .9rem; line-height: 1.6; color: var(--muted); }
+
+    /* ── RADAR / FLIGHTRADAR ── */
+    #radar { padding: 0 48px 80px; }
+    .radar-box {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 48px 32px;
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .radar-anim {
+      width: 120px; height: 120px;
+      border: 2px solid rgba(0,212,255,.3);
+      border-radius: 50%; margin: 0 auto 24px;
+      position: relative;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .radar-anim::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: 50%;
+      background: conic-gradient(from 0deg, rgba(0,212,255,.4) 0deg, transparent 60deg);
+      animation: radarSpin 2.5s linear infinite;
+    }
+    @keyframes radarSpin {
+      to { transform: rotate(360deg); }
+    }
+    .radar-center {
+      width: 8px; height: 8px;
+      background: var(--cyan); border-radius: 50%;
+      box-shadow: 0 0 12px var(--cyan);
+      z-index: 1;
+    }
+    .radar-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.4rem; margin-bottom: 12px;
+    }
+    .radar-desc {
+      color: var(--muted); max-width: 480px; margin: 0 auto 24px;
+      line-height: 1.7;
+    }
+    .flightradar-btn {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 14px 36px;
+      font-family: 'Orbitron', monospace;
+      font-size: .8rem; font-weight: 700;
+      letter-spacing: 2px; text-decoration: none;
+      background: transparent;
+      border: 1px solid var(--cyan); color: var(--cyan);
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+      transition: all .25s;
+    }
+    .flightradar-btn:hover {
+      background: var(--cyan); color: var(--deep);
+    }
+
+    /* ── SCHEDULE TABLE ── */
+    #schedule { padding: 0 48px 80px; }
+
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: .9rem;
+    }
+    thead tr {
+      background: rgba(0,212,255,.1);
+      border-bottom: 1px solid var(--border);
+    }
+    thead th {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .75rem; letter-spacing: 2px;
+      color: var(--cyan); text-align: left;
+      padding: 14px 20px; text-transform: uppercase;
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(0,212,255,.06);
+      transition: background .2s;
+    }
+    tbody tr:hover { background: rgba(0,212,255,.04); }
+    tbody td { padding: 14px 20px; color: rgba(232,244,255,.8); }
+    .status-badge {
+      display: inline-block; padding: 3px 10px;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .7rem; letter-spacing: 1px;
+    }
+    .status-on-time { background: rgba(0,255,100,.1); color: #00ff64; border: 1px solid rgba(0,255,100,.3); }
+    .status-delayed { background: rgba(245,166,35,.1); color: var(--gold); border: 1px solid rgba(245,166,35,.3); }
+    .status-landed  { background: rgba(0,212,255,.1);  color: var(--cyan); border: 1px solid var(--border); }
+
+    /* ── JOIN COMMUNITY ── */
+    #join { padding: 0 48px 80px; }
+    .join-box {
+      border: 1px solid var(--border);
+      background: var(--card);
+      padding: 60px 40px; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .join-box::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(26,107,255,.08), transparent);
+    }
+    .join-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      font-weight: 900; margin-bottom: 12px;
+      position: relative; z-index: 1;
+    }
+    .join-text {
+      color: var(--muted); max-width: 480px; margin: 0 auto 32px;
+      line-height: 1.7; position: relative; z-index: 1;
+    }
+    .social-links {
+      display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;
+      position: relative; z-index: 1;
+    }
+    .social-link {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 12px 28px;
+      font-family: 'Orbitron', monospace; font-size: .75rem;
+      font-weight: 700; letter-spacing: 2px;
+      text-decoration: none; text-transform: uppercase;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+      transition: all .25s;
+    }
+    .social-tg { background: rgba(0,136,204,.2); color: #29b6f6; border: 1px solid rgba(0,136,204,.3); }
+    .social-tg:hover { background: rgba(0,136,204,.4); }
+    .social-ig { background: rgba(225,48,108,.15); color: #e1306c; border: 1px solid rgba(225,48,108,.3); }
+    .social-ig:hover { background: rgba(225,48,108,.3); }
+    .social-yt { background: rgba(255,0,0,.1); color: #ff4545; border: 1px solid rgba(255,0,0,.2); }
+    .social-yt:hover { background: rgba(255,0,0,.2); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 48px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-logo {
+      font-family: 'Orbitron', monospace;
+      font-weight: 900; font-size: 1.1rem;
+      color: var(--cyan);
+    }
+    .footer-logo span { color: var(--gold); }
+    .footer-copy {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .75rem; color: var(--muted);
+    }
+    .footer-links {
+      display: flex; gap: 24px;
+    }
+    .footer-links a {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: .75rem; color: var(--muted);
+      text-decoration: none; letter-spacing: 1px;
+      transition: color .25s;
+    }
+    .footer-links a:hover { color: var(--cyan); }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--deep); }
+    ::-webkit-scrollbar-thumb { background: rgba(0,212,255,.3); border-radius: 3px; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      nav { padding: 14px 20px; }
+      nav ul { display: none; }
+      #gallery, #videos, #facts, #airlines, #spotter, #radar, #schedule, #join { padding-left: 20px; padding-right: 20px; }
+      .gallery-grid { grid-template-columns: 1fr 1fr; }
+      .gallery-item:first-child { grid-column: span 2; }
+      footer { padding: 28px 20px; flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- STARS -->
+<div class="stars" id="starsContainer"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">FAN<span>D</span>ISPOTTER</div>
+  <ul>
+    <li><a href="#gallery">Фото</a></li>
+    <li><a href="#videos">Видео</a></li>
+    <li><a href="#facts">Факты</a></li>
+    <li><a href="#airlines">Авиакомпании</a></li>
+   
+    
+    <li><a href="#join">Сообщество</a></li>
+  </ul>
+  <div class="nav-badge">TAS · UTTT</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-plane">✈</div>
+  <div class="runway"></div>
+
+  <div class="hero-tag">// ТАШКЕНТ · АВИАЦИЯ · СПОТТИНГ</div>
+  <h1>FAN<span class="accent">D</span>I<br>SPOTTER</h1>
+  <div class="hero-sub">Tashkent Aviation Community</div>
+  <p class="hero-desc">
+    Сообщество авиаспоттеров Ташкента. Фото и видео самолётов, 
+    факты об авиации. 
+  </p>
+  <div class="hero-btns">
+    <a href="#gallery" class="btn btn-primary">✈ Смотреть фото</a>
+    
+  </div>
+
+ 
+<!-- GALLERY -->
+<section id="gallery">
+
+  <div class="section-header">
+    
+    <h2 class="section-title">Лучшие <span class="accent">кадры</span></h2>
+    <div class="divider"></div>
+  </div>
+
+  <div style="text-align:center;">
+    <img src="photo4.jpg"
+         style="width:90%; max-width:900px; height:auto; border-radius:12px; display:block; margin:auto;"
+         alt="Aircraft Photo">
+          <div style="margin-top:10px; font-size:14px; color:#00d4ff; letter-spacing:1px;">
+    BOEING 787 DREAMLINER   
+  </div>
+
+   <!-- МАЛЕНЬКИЕ ФОТО (НО НОРМ РАЗМЕР) -->
+<div style="width:90%; max-width:900px; margin:20px auto 0; display:flex; gap:10px;">
+
+  <div style="flex:1; text-align:center;">
+    <img src="photo1.jpg"
+         style="width:100%; height:200px; object-fit:cover; border-radius:12px;">
+    <div style="margin-top:8px; font-size:13px; color:#7a9cc0;">
+      CENTRUM AIR AIRBUS A330
+    </div>
+  </div>
+
+  <div style="flex:1; text-align:center;">
+    <img src="photo5.jpg"
+         style="width:100%; height:200px; object-fit:cover; border-radius:12px;">
+    <div style="margin-top:8px; font-size:13px; color:#7a9cc0;">
+      QANOT SHARQ AIRBUS A330
+    </div>
+  </div>
+
+  <div style="flex:1; text-align:center;">
+    <img src="photo6.jpg"
+         style="width:100%; height:200px; object-fit:cover; border-radius:12px;">
+    <div style="margin-top:8px; font-size:13px; color:#7a9cc0;">
+      FLY KHIVA BOEING 757
+    </div>
+  </div>
+
+</div>
+
+
+</section>
+
+
+
+<!-- FACTS -->
+<section id="facts">
+  <div class="section-header">
+   
+    <h2 class="section-title">Интересные <span class="accent">факты</span></h2>
+    <div class="divider"></div>
+  </div>
+
+  <div class="facts-grid">
+    <div class="fact-card">
+      <div class="fact-icon">✈</div>
+      <div class="fact-title">Boeing 787 Dreamliner</div>
+      <div class="fact-text">Флагманский самолёт Uzbekistan Airways. Крылья из углеродного волокна позволяют им изгибаться на 7 метров — это делает полёт более плавным и экономит 20% топлива по сравнению с предыдущими моделями.</div>
+      <div class="fact-num">787</div>
+    </div>
+    <div class="fact-card">
+      <div class="fact-icon">🛫</div>
+      <div class="fact-title">ФЛОТ Uzbekistan Airways </div>
+      <div class="fact-text">Флот Uzbekistan Airways насчитывает около 30–35 самолётов, включая Boeing 787 Dreamliner, Boeing 767, а также семейство Airbus A320/A321neo. Компания постепенно обновляет парк, заменяя старые самолёты на более современные и экономичные модели.</div>
+      <div class="fact-num">10км</div>
+    </div>
+    <div class="fact-card">
+      <div class="fact-icon">⚡</div>
+      <div class="fact-title">Скорость самолёта</div>
+      <div class="fact-text">Крейсерская скорость Boeing 787 составляет около 903 км/ч — это 0.85 Маха. Для сравнения: звуковой барьер — 1 234 км/ч. Реактивные самолёты практически летят со скоростью звука!</div>
+      <div class="fact-num">903</div>
+    </div>
+    <div class="fact-card">
+      <div class="fact-icon">🌏</div>
+      <div class="fact-title">UZBEKISTAN AIRWAYS</div>
+      <div class="fact-text">Uzbekistan Airways является национальным авиаперевозчиком Узбекистана и выполняет рейсы более чем в 50 городов мира. Флот компании включает современные Boeing 787 Dreamliner и Airbus A320neo, обеспечивая дальние и региональные перелёты с высоким уровнем комфорта и безопасности.</div>
+      <div class="fact-num">TAS</div>
+    </div>
+    
+    
+  </div>
+
+  <section id="topspotters">
+
+  <div class="section-header">
+    
+    <h2 class="section-title">Лучшие <span class="accent">споттеры Ташкента</span></h2>
+    <div class="divider"></div>
+  </div>
+
+  <div style="display:flex; gap:30px; justify-content:center; flex-wrap:wrap; padding:0 20px 80px;">
+
+    <!-- SPOTTER 1 -->
+    <div style="text-align:center; width:240px;">
+
+      <img src="spotter1.jpg"
+           style="width:180px; height:180px; border-radius:50%;
+                  object-fit:cover; border:3px solid #00d4ff;
+                  box-shadow:0 0 20px rgba(0,212,255,0.25);">
+
+      <div style="margin-top:14px; font-weight:700; font-size:18px;">
+        AVIASPOTTING_UZB
+      </div>
+
+      <a href=https://www.instagram.com/aviaspotting_uzb?igsh=c3dkOGF2OGN4dWZp
+         target="_blank"
+         style="display:inline-block; margin-top:6px;
+                color:#00d4ff; text-decoration:none; font-size:14px;">
+        📸 Instagram
+      </a>
+
+    </div>
+
+    <!-- SPOTTER 2 -->
+    <div style="text-align:center; width:240px;">
+
+      <img src="spotter2.jpg"
+           style="width:180px; height:180px; border-radius:50%;
+                  object-fit:cover; border:3px solid #00d4ff;
+                  box-shadow:0 0 20px rgba(0,212,255,0.25);">
+
+      <div style="margin-top:14px; font-weight:700; font-size:18px;">
+        sky.aviation_
+      </div>
+
+      <a href=https://www.instagram.com/sky.aviation_?igsh=MXVvOHhqNDJoemt0Mw==
+         target="_blank"
+         style="display:inline-block; margin-top:6px;
+                color:#00d4ff; text-decoration:none; font-size:14px;">
+        📸 Instagram
+      </a>
+
+    </div>
+
+    <!-- SPOTTER 3 -->
+    <div style="text-align:center; width:240px;">
+
+      <img src="spotter3.jpg"
+           style="width:180px; height:180px; border-radius:50%;
+                  object-fit:cover; border:3px solid #00d4ff;
+                  box-shadow:0 0 20px rgba(0,212,255,0.25);">
+
+      <div style="margin-top:14px; font-weight:700; font-size:18px;">
+        dilmurod_spotter
+      </div>
+
+      <a href=https://www.instagram.com/dilmurod_spotter?igsh=bnlhems3dzVxOW1t
+         target="_blank"
+         style="display:inline-block; margin-top:6px;
+                color:#00d4ff; text-decoration:none; font-size:14px;">
+        📸 Instagram
+      </a>
+
+    </div>
+
+    <!-- SPOTTER 4 -->
+    <div style="text-align:center; width:240px;">
+
+      <img src="spotter4.jpg"
+           style="width:180px; height:180px; border-radius:50%;
+                  object-fit:cover; border:3px solid #00d4ff;
+                  box-shadow:0 0 20px rgba(0,212,255,0.25);">
+
+      <div style="margin-top:14px; font-weight:700; font-size:18px;">
+        spotter.aviation_
+      </div>
+
+      <a href=https://www.instagram.com/spotter.aviation_?igsh=MTA1NWMybHlqdGIwNg==
+         target="_blank"
+         style="display:inline-block; margin-top:6px;
+                color:#00d4ff; text-decoration:none; font-size:14px;">
+        📸 Instagram
+      </a>
+
+    </div>
+
+  </div>
+
+</section>
+
+<!-- AIRLINES -->
+<section id="airlines">
+  <div class="section-header">
+    
+    <h2 class="section-title">Авиакомпании <span class="accent">Ташкента</span></h2>
+    <div class="divider"></div>
+  </div>
+
+  <div class="airlines-grid">
+    <div class="airline-card">
+      <div class="airline-logo">🇺🇿</div>
+      <div class="airline-name">UZBEKISTAN AIRWAYS</div>
+      <div class="airline-code">HY · UZB · IATA: HY</div>
+      <div class="airline-text">
+        Национальный авиаперевозчик Узбекистана. Основан в 1992 году. Флот включает Boeing 787 Dreamliner, Boeing 767, Airbus A320/A321neo. Выполняет рейсы в Европу, Азию, Америку и страны СНГ.
+      </div>
+      <div class="airline-route">
+        <span class="route-tag">LHR</span>
+        <span class="route-tag">JFK</span>
+        <span class="route-tag">ICN</span>
+        <span class="route-tag">IST</span>
+        <span class="route-tag">FRA</span>
+        <span class="route-tag">PEK</span>
+      </div>
+    </div>
+
+    <div class="airline-card">
+  <div class="airline-logo">✈</div>
+
+  <div class="airline-name">
+    ЧАСТНЫЕ АВИАКОМПАНИИ УЗБЕКИСТАНА
+  </div>
+
+  <div class="airline-code">
+    PRIVATE AIRLINES · UZBEKISTAN
+  </div>
+
+  <div class="airline-text">
+    В последние годы авиация Узбекистана активно развивается.
+    
+
+    Centrum Air активно расширяет международные рейсы,
+    Qanot Sharq считается одной из самых быстрорастущих авиакомпаний страны,
+    Silk Avia выполняет внутренние рейсы между регионами Узбекистана,
+    Air Samarkand развивает туристическое направление,
+    а Fly Khiva и FlyOne Uzbekistan постепенно увеличивают свой флот.
+  </div>
+
+  <div class="airline-route">
+    <span class="route-tag">QANOT SHARQ</span>
+    <span class="route-tag">CENTRUM AIR</span>
+    <span class="route-tag">FLYONE</span>
+    <span class="route-tag">SILK AVIA</span>
+    <span class="route-tag">AIR SAMARKAND</span>
+    <span class="route-tag">FLY KHIVA</span>
+  </div>
+</div>
+
+    <div class="airline-card">
+      <div class="airline-logo">✈</div>
+      <div class="airline-name">ГОСТЕВЫЕ АВИАКОМПАНИИ</div>
+      <div class="airline-code">ИНОСТРАННЫЕ ПЕРЕВОЗЧИКИ</div>
+      <div class="airline-text">
+        В Ташкент летают Turkish Airlines, Flydubai, Air Arabia, Pegasus, China Southern, Korean Air, S7, Aeroflot и десятки других авиакомпаний — отличные объекты для споттинга!
+      </div>
+      <div class="airline-route">
+        <span class="route-tag">TK</span>
+       
+        <span class="route-tag">FZ</span>
+        <span class="route-tag">G9</span>
+        <span class="route-tag">CZ</span>
+        <span class="route-tag">KE</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SPOTTER GALLERY 8 PHOTOS -->
+<section id="spotter-gallery">
+  <div class="section-header">
+    <span class="section-tag">// SPOTTER GALLERY</span>
+    <h2 class="section-title">Лучшие <span class="accent">кадры споттинга</span></h2>
+    <div class="divider"></div>
+  </div>
+
+  <div style="
+    display:grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap:12px;
+    padding: 0 48px 80px;
+  ">
+
+    <img src="photo8.jpg" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
+    <img src="photo3.jpg" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
+    <img src="photo12.jpg" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
+    <img src="photo11.jpg" style="width:100%; height:180px; object-fit:cover; border-radius:12px;">
+   
+    
+  </div>
+</section>
+
+
+
+<!-- RADAR -->
+<section id="radar">
+  <div class="section-header">
+   
+    <h2 class="section-title">Живые <span class="accent">рейсы</span></h2>
+    <div class="divider"></div>
+  </div>
+  <div class="radar-box">
+    <div class="radar-anim"><div class="radar-center"></div></div>
+    <div class="radar-title">Онлайн радар — Ташкент</div>
+    <div class="radar-desc">
+      Отслеживай все рейсы над Ташкентом в реальном времени. 
+      Нажми кнопку, чтобы открыть Flightradar24 и увидеть все самолёты над Узбекистаном прямо сейчас.
+    </div>
+    <a href="https://www.flightradar24.com/41.26,69.21/10" target="_blank" rel="noopener" class="flightradar-btn">
+      📡 Открыть Flightradar24 — Ташкент
+    
+    </a>
+  </div>
+</section>
+
+<section id="map">
+  <div class="section-header">
+    
+    <h2 class="section-title">Споттинг <span class="accent">локации Ташкента</span></h2>
+    <div class="divider"></div>
+  </div>
+
+  <div style="padding:0 24px;">
+    <iframe
+      src="https://www.google.com/maps?q=Tashkent+International+Airport&output=embed"
+      width="100%"
+      height="500"
+      style="border:0; border-radius:16px; box-shadow:0 0 30px rgba(0,212,255,0.15);"
+      allowfullscreen=""
+      loading="lazy">
+    </iframe>
+    
+  </div>
+</section>
+
+
+
+<!-- JOIN -->
+<section id="join">
+  <div class="section-header">
+
+ 
+    <div class="divider"></div>
+  </div>
+  <div class="join-box">
+    <div class="join-title">Присоединяйся к авиасообществу Ташкента ✈</div>
+    <div class="join-text">
+      Делись своими фото и видео, узнавай о редких бортах, 
+      участвуй в споттинг-встречах у аэропорта Ташкента.
+    </div>
+    <div class="social-links">
+
+  <a href="https://t.me/fandispotter" target="_blank" class="social-link social-tg">
+    📱 Telegram
+  </a>
+
+  <a href="https://www.instagram.com/fandispotter?igsh=MWQ2OWlsa3hrcHpwNg%3D%3D&utm_source=qr"
+     target="_blank"
+     class="social-link social-ig">
+    📸 Instagram
+  </a>
+
+</div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">FAN<span>D</span>ISPOTTER</div>
+  <div class="footer-copy">© 2025 FanDispotter · Tashkent Aviation Community · TAS / UTTT</div>
+  <div class="footer-links">
+    <a href="#gallery">Фото</a>
+    <a href="#facts">Факты</a>
+    <a href="#spotter">Споттинг</a>
+    <a href="https://www.flightradar24.com/41.26,69.21/10" target="_blank" rel="noopener">Радар</a>
+  </div>
+</footer>
+
+<script>
+  // Generate stars
+  const container = document.getElementById('starsContainer');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      left:${Math.random()*100}%;
+      top:${Math.random()*100}%;
+      width:${size}px; height:${size}px;
+      --d:${(Math.random()*3+2).toFixed(1)}s;
+      animation-delay:${(Math.random()*4).toFixed(1)}s;
+    `;
+    container.appendChild(s);
+  }
+
+  // Smooth scroll for nav links
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+    });
+  });
+
+  // Intersection observer for cards
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.fact-card, .airline-card, .video-card, .tip-item').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity .5s ease, transform .5s ease';
+    observer.observe(el);
+  });
+</script>
+
+</body> 
+<div id="preloader">
+  <div class="runway-lines"></div>
+  <div class="smoke"></div>
+  <div class="plane">✈</div>
+</div>
+
+<script>
+function setTimeTheme() {
+  const hour = new Date().getHours();
+
+  if (hour >= 6 && hour < 16) {
+    document.body.style.background = "#0a1628"; // день (синий)
+  } 
+  else if (hour >= 16 && hour < 19) {
+    document.body.style.background = "linear-gradient(180deg, #0a1628, #f5a623)"; // закат
+  } 
+  else {
+    document.body.style.background = "#050d1a"; // ночь
+  }
+}
+
+setTimeTheme();
+</script>
+
+<div class="flying-plane">✈</div>
+
+</html>
